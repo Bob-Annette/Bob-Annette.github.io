@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>如何用Hexo发博客</title>
+    <link href="/2024/08/12/%E5%A6%82%E4%BD%95%E7%94%A8Hexo%E5%8F%91%E5%8D%9A%E5%AE%A2/"/>
+    <url>/2024/08/12/%E5%A6%82%E4%BD%95%E7%94%A8Hexo%E5%8F%91%E5%8D%9A%E5%AE%A2/</url>
+    
+    <content type="html"><![CDATA[<h2 id="启动Hexo环境"><a href="#启动Hexo环境" class="headerlink" title="启动Hexo环境"></a>启动Hexo环境</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs powershell">winget install Schniz.fnm <span class="hljs-comment"># 安装过后就不用再运行</span><br>fnm env <span class="hljs-literal">--use-on-cd</span> | <span class="hljs-built_in">Out-String</span> | <span class="hljs-built_in">Invoke-Expression</span><br>fnm use <span class="hljs-literal">--install-if-missing</span> <span class="hljs-number">20</span><br>node <span class="hljs-literal">-v</span><br>npm <span class="hljs-literal">-v</span><br>hexo <span class="hljs-literal">-v</span> <span class="hljs-comment"># 用于判断是否启动成功</span><br></code></pre></td></tr></table></figure><h2 id="生成-发布文章"><a href="#生成-发布文章" class="headerlink" title="生成&#x2F;发布文章"></a>生成&#x2F;发布文章</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs powershell">hexo clean <span class="hljs-comment"># 清理缓存</span><br>hexo generate <span class="hljs-comment"># Generate static files</span><br>hexo server <span class="hljs-comment"># Run server</span><br>hexo deploy <span class="hljs-comment"># Deploy to remote sites</span><br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Hello World</title>
     <link href="/2024/08/11/hello-world/"/>
     <url>/2024/08/11/hello-world/</url>
