@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { categoryForSlug, formatDate, postUrl, sections } from '../data/site';
+
+export function getStaticPaths() {
+  return sections.filter((section) => section.slug !== 'work').map((section) => ({ params: { section: section.slug }, props: { section } }));
+}
+
+const { section } = Astro.props;
+const category = categoryForSlug[section.slug as keyof typeof categoryForSlug];
+const posts = (await getCollection('posts', ({ data }) => !data.draft && data.category === category))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout title={section.title} description={section.description}>
+  <div class="shell page-shell">
+    <header class="page-heading"><div class="eyebrow">{section.index} / {section.en}</div><h1>{section.title}</h1><p>{section.description}</p></header>
+    <div class="content-columns">
+      <section aria-label={`${section.title}文章`}>
+        {posts.length > 0 ? <div class="post-list">{posts.map((post) => (
+          <a class="post-row" href={postUrl(post.id)}><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time><div><h2>{post.data.title}</h2><p>{post.data.description}</p></div><span class="row-arrow" aria-hidden="true">↗</span></a>
+        ))}</div> : <div class="empty-state"><div class="empty-mark" aria-hidden="true">⌁</div><h2>这里还在整理中</h2><p>栏目已准备好。新的内容会在写完并验证后陆续发布；现在可以先试试站内的模拟路径实验。</p><a href="/lab/">打开交互实验 →</a></div>}
+      </section>
+      <aside class="panel sidebar-note"><h3>关于这个栏目</h3><p>{section.description}文章会尽量交代背景、过程、局限与可复现的材料。</p></aside>
+    </div>
+  </div>
+</BaseLayout>

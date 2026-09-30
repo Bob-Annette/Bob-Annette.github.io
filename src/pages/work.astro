@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="成果" description="FightingBob 的交互实验与公开代码。">
+  <div class="shell page-shell">
+    <header class="page-heading"><div class="eyebrow">04 / SELECTED WORK</div><h1>成果</h1><p>把思考做成能打开、能试用、能读源码的东西。</p></header>
+    <div class="work-intro">
+      <article class="panel work-card"><div class="work-icon" aria-hidden="true">⌁</div><div class="micro-label" style="margin-top:20px">SITE EXPERIMENT / 001</div><h2>模拟路径实验室</h2><p>一个纯浏览器端的小实验：调节趋势和波动，观察模拟序列的形状如何改变。所有数据均为演示用途。</p><a class="button-primary" href="/lab/">立即体验 <span aria-hidden="true">→</span></a></article>
+      <article class="panel work-card"><div class="work-icon" aria-hidden="true">↗</div><div class="micro-label" style="margin-top:20px">PUBLIC REPOSITORIES</div><h2>GitHub 公开仓库</h2><p>下方列表通过 GitHub 公开 API 在浏览器中获取。可以用关键词筛选，直接打开源码。</p><a class="button-quiet" href="https://github.com/Bob-Annette?tab=repositories" target="_blank" rel="noopener noreferrer">在 GitHub 查看全部仓库 ↗</a></article>
+    </div>
+    <section class="panel github-panel" aria-labelledby="github-heading">
+      <h2 id="github-heading">公开代码</h2><p class="panel-description">实时读取 Bob-Annette 的公开仓库。GitHub API 暂时不可用时，可通过上方链接直接浏览。</p>
+      <div class="work-toolbar"><input id="repo-filter" class="work-input" type="search" placeholder="筛选仓库名称或描述" aria-label="筛选仓库" disabled /><span id="repo-count" class="micro"></span></div>
+      <div id="repo-list" class="repo-list" aria-live="polite"><div class="repo-status">正在加载公开仓库…</div></div>
+    </section>
+  </div>
+  <script>
+    interface Repo { name: string; description: string | null; html_url: string; language: string | null; stargazers_count: number; fork: boolean; archived: boolean; }
+    const list = document.querySelector<HTMLDivElement>('#repo-list');
+    const filter = document.querySelector<HTMLInputElement>('#repo-filter');
+    const count = document.querySelector<HTMLElement>('#repo-count');
+    let repos: Repo[] = [];
+
+    function showStatus(message: string) {
+      if (!list) return;
+      list.replaceChildren();
+      const box = document.createElement('div');
+      box.className = 'repo-status';
+      box.textContent = message;
+      list.append(box);
+    }
+
+    function renderRepos() {
+      if (!list || !filter || !count) return;
+      const term = filter.value.trim().toLocaleLowerCase();
+      const filtered = repos.filter((repo) => `${repo.name} ${repo.description ?? ''} ${repo.language ?? ''}`.toLocaleLowerCase().includes(term));
+      list.replaceChildren();
+      count.textContent = `显示 ${filtered.length} 个仓库`;
+      if (!filtered.length) return showStatus('没有找到匹配的公开仓库。');
+      for (const repo of filtered) {
+        const card = document.createElement('a');
+        card.className = 'repo-item';
+        card.href = repo.html_url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+        const title = document.createElement('h3');
+        title.textContent = repo.name;
+        const description = document.createElement('p');
+        description.textContent = repo.description || '暂无仓库描述';
+        const footer = document.createElement('footer');
+        footer.textContent = `${repo.language || '代码'} · ★ ${repo.stargazers_count}`;
+        card.append(title, description, footer);
+        list.append(card);
+      }
+    }
+
+    async function loadRepos() {
+      try {
+        const response = await fetch('https://api.github.com/users/Bob-Annette/repos?sort=updated&per_page=100', { headers: { Accept: 'application/vnd.github+json' } });
+        if (!response.ok) throw new Error(String(response.status));
+        const data: unknown = await response.json();
+        if (!Array.isArray(data)) throw new Error('Unexpected response');
+        repos = (data as Repo[]).filter((repo) => !repo.fork && !repo.archived && repo.name !== 'Bob-Annette.github.io' && /^https:\/\/github\.com\/Bob-Annette\//i.test(repo.html_url));
+        filter!.disabled = false;
+        renderRepos();
+      } catch {
+        showStatus('暂时无法读取 GitHub 公开仓库，请使用上方链接前往 GitHub 查看。');
+      }
+    }
+
+    filter?.addEventListener('input', renderRepos);
+    void loadRepos();
+  </script>
+</BaseLayout>

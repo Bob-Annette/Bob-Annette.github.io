@@ -1,0 +1,79 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ResearchVisual from '../components/ResearchVisual.astro';
+import DemoChart from '../components/DemoChart.astro';
+import { formatDate, postUrl, sections } from '../data/site';
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout title="首页">
+  <div class="shell page-shell">
+    <section class="hero" aria-labelledby="hero-title">
+      <ResearchVisual />
+      <div class="hero-copy">
+        <div class="eyebrow">QUANTITATIVE RESEARCH & PRACTICE</div>
+        <h1 id="hero-title">用代码观察市场</h1>
+        <p>记录量化研究、AI 实验与技术思考。把过程写清楚，也把能动手试的作品留在这里。</p>
+      </div>
+      <div class="hero-note">研究 · 实验 · 分享<br />保持好奇，持续构建</div>
+    </section>
+
+    <div class="main-grid">
+      <section class="panel feature-card" aria-labelledby="feature-title">
+        <div class="feature-head"><div class="kicker"><span class="tag">量化研究</span><span>RESEARCH NOTEBOOK</span></div><span class="micro">持续更新</span></div>
+        <div class="feature-body">
+          <div class="feature-copy">
+            <h2 id="feature-title">从问题出发，<br />让研究可以复现。</h2>
+            <p>这里将整理数据处理、策略假设、回测验证与结果反思。第一版先搭好阅读与实验空间，研究内容会逐步写入。</p>
+            <a class="button-primary" href="/quant/">进入量化栏目 <span aria-hidden="true">→</span></a>
+          </div>
+          <div><DemoChart /><div class="disclaimer">示意曲线 · 模拟数据，不代表真实收益或研究结论</div></div>
+        </div>
+      </section>
+
+      <aside class="panel index-panel" aria-labelledby="index-title">
+        <div class="panel-heading"><h2 id="index-title">研究索引</h2><a href="/work/">探索作品 ↗</a></div>
+        <ol class="research-index">
+          {sections.map((section) => (
+            <li><a href={`/${section.slug}/`}><span class="index-number">{section.index}</span><span class="index-title">{section.title}</span><span class="index-desc">{section.description}</span><span class="index-arrow" aria-hidden="true">→</span></a></li>
+          ))}
+        </ol>
+        <div class="index-footer"><span>把想法变成可阅读、可运行的作品</span><strong>FightingBob ↗</strong></div>
+      </aside>
+    </div>
+
+    <div class="content-grid">
+      <section aria-labelledby="latest-title">
+        <div class="section-heading"><h2 id="latest-title">最新文章</h2><a href="/notes/">查看栏目 ↗</a></div>
+        <div class="article-list">
+          {posts.slice(0, 1).map((post) => (
+            <article class="panel article-card">
+              <div class="article-meta"><span class="tag">{post.data.category}</span><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>{post.data.legacy && <span>旧文存档</span>}</div>
+              <h3><a href={postUrl(post.id)}>{post.data.title}</a></h3>
+              <p>{post.data.description}</p>
+              <a class="read-link" href={postUrl(post.id)}>阅读文章 →</a>
+            </article>
+          ))}
+          <div class="placeholder-card"><div class="small-icon" aria-hidden="true">✳</div><h3>新的研究，正在整理</h3><p>后续文章会在这里出现。量化栏目将优先更新，保留研究假设、方法与限制。</p></div>
+        </div>
+      </section>
+      <section aria-labelledby="tool-title">
+        <div class="section-heading"><h2 id="tool-title">可以动手试</h2><a href="/work/">查看成果 ↗</a></div>
+        <div class="panel tool-card">
+          <div class="tool-card-top"><div class="tool-icon" aria-hidden="true">⌁</div><div><h3>模拟路径实验室</h3><p>拖动参数，看一条模拟序列如何变化。</p></div></div>
+          <div class="tool-tags"><span>交互演示</span><span>模拟数据</span><span>浏览器运行</span></div>
+          <a class="button-quiet" href="/lab/">打开实验室 <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="category-strip" aria-label="浏览栏目">
+      {sections.map((section) => (
+        <a class="category-tile" href={`/${section.slug}/`}><span class="tile-id">{section.index} / {section.en}</span><h3>{section.title}</h3><div class="tile-bottom"><p>{section.description}</p><span aria-hidden="true">↗</span></div></a>
+      ))}
+    </nav>
+  </div>
+</BaseLayout>

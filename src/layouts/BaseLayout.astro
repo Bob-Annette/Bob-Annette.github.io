@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import { sections } from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'FightingBob 的个人博客：量化研究、AI 实验、杂谈与成果。' } = Astro.props;
+const path = Astro.url.pathname;
+const pageTitle = title === '首页' ? 'FightingBob · 用代码观察世界' : `${title} · FightingBob`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8fafc" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳转到正文</a>
+    <header class="site-header">
+      <div class="shell nav-inner">
+        <a class="brand" href="/" aria-label="FightingBob 首页">Fighting<span>Bob</span><i aria-hidden="true"></i></a>
+        <nav class="desktop-nav" aria-label="主导航">
+          {sections.map((section) => (
+            <a href={`/${section.slug}/`} aria-current={path.startsWith(`/${section.slug}/`) ? 'page' : undefined}>{section.title}</a>
+          ))}
+        </nav>
+        <div class="nav-actions">
+          <a class="github-link" href="https://github.com/Bob-Annette" target="_blank" rel="noopener noreferrer" aria-label="在 GitHub 查看 FightingBob 的主页">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.76-.24.76-.54v-1.9c-3.1.68-3.76-1.32-3.76-1.32-.5-1.29-1.23-1.63-1.23-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15.99 1.69 2.6 1.2 3.23.92.1-.72.39-1.2.7-1.48-2.47-.28-5.07-1.24-5.07-5.52 0-1.22.44-2.22 1.15-3-.11-.29-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.15a10.7 10.7 0 0 1 5.6 0c2.14-1.45 3.07-1.15 3.07-1.15.62 1.54.23 2.67.12 2.96.72.78 1.14 1.78 1.14 3 0 4.29-2.6 5.23-5.08 5.51.4.35.75 1.03.75 2.08v3.08c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"/></svg>
+          </a>
+          <a class="nav-about" href="/about/">关于我 <span aria-hidden="true">↗</span></a>
+          <button class="menu-toggle" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+      <nav id="mobile-menu" class="mobile-nav" aria-label="移动导航" hidden>
+        {sections.map((section) => <a href={`/${section.slug}/`}>{section.title}</a>)}
+        <a href="/about/">关于我</a>
+      </nav>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <div><a class="footer-brand" href="/">FightingBob<span class="accent-dot">.</span></a><p>记录研究、实验和一路做出的东西。</p></div>
+        <div class="footer-links"><a href="/quant/">量化</a><a href="/ai/">AI动手玩</a><a href="/notes/">杂谈</a><a href="/work/">成果</a><a href="https://github.com/Bob-Annette" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+        <div class="copyright">© {new Date().getFullYear()} FightingBob</div>
+      </div>
+    </footer>
+    <script>
+      const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
+      const mobileMenu = document.querySelector<HTMLElement>('#mobile-menu');
+      menuButton?.addEventListener('click', () => {
+        if (!mobileMenu) return;
+        const expanded = menuButton.getAttribute('aria-expanded') === 'true';
+        menuButton.setAttribute('aria-expanded', String(!expanded));
+        menuButton.setAttribute('aria-label', expanded ? '打开菜单' : '关闭菜单');
+        mobileMenu.hidden = expanded;
+      });
+    </script>
+  </body>
+</html>

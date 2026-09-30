@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../data/site';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <div class="shell page-shell"><article class="article-shell">
+    <header class="article-top"><div class="eyebrow">{post.data.category} / ARTICLE</div><h1>{post.data.title}</h1><p>{post.data.description}</p><div class="article-meta-line"><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time><span>·</span><span>FightingBob</span></div></header>
+    {post.data.legacy && <div class="legacy-banner">旧文存档：这篇文章写于 2024 年，内容可能不适用于现在的建站流程。</div>}
+    <div class="prose"><Content /></div>
+    <p style="margin-top:60px"><a class="button-quiet" href="/notes/">← 返回文章列表</a></p>
+  </article></div>
+</BaseLayout>

@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="模拟路径实验室" description="拖动趋势与波动参数，观察模拟序列如何变化。纯浏览器端交互演示。">
+  <div class="shell page-shell">
+    <header class="page-heading"><div class="eyebrow">INTERACTIVE / BROWSER LAB</div><h1>模拟路径实验室</h1><p>改动两个参数，看模拟路径如何变化。实验在浏览器里运行，不读取真实市场数据。</p></header>
+    <div class="lab-wrap">
+      <section class="panel lab-controls" aria-labelledby="controls-title">
+        <h2 id="controls-title">实验参数</h2><p>固定同一组随机扰动，仅改变趋势和波动，便于比较参数的影响。</p>
+        <div class="field"><label for="trend">趋势 <output id="trend-value" for="trend">0.2</output></label><input type="range" id="trend" min="-1" max="1" step="0.1" value="0.2" /></div>
+        <div class="field"><label for="volatility">波动 <output id="volatility-value" for="volatility">0.5</output></label><input type="range" id="volatility" min="0" max="1" step="0.1" value="0.5" /></div>
+        <div class="lab-warning">这是用于说明交互与数据可视化的模拟序列，不是策略回测、投资建议或收益预测。</div>
+      </section>
+      <section class="panel lab-output" aria-labelledby="output-title">
+        <div class="feature-head"><div><h2 id="output-title">路径预览</h2><p>横轴表示步骤；纵轴表示相对位置。</p></div><span class="tag">模拟数据</span></div>
+        <svg viewBox="0 0 760 320" preserveAspectRatio="none" role="img" aria-label="随参数更新的模拟路径曲线">
+          <g stroke="#e8f0f5" stroke-width="1"><path d="M0 40H760M0 100H760M0 160H760M0 220H760M0 280H760"/><path d="M76 0V320M190 0V320M304 0V320M418 0V320M532 0V320M646 0V320"/></g>
+          <path id="path-fill" fill="#dff3fb" opacity=".7"></path>
+          <path id="path-line" fill="none" stroke="#2e9fd3" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+        <div class="chart-axis"><span>第 1 步</span><span>第 60 步</span></div>
+        <div class="lab-summary"><div>步数<strong>60</strong></div><div>趋势参数<strong id="summary-trend">+0.2</strong></div><div>波动参数<strong id="summary-volatility">0.5</strong></div></div>
+      </section>
+    </div>
+    <p style="margin-top:30px"><a class="button-quiet" href="/work/">← 返回成果</a></p>
+  </div>
+  <script>
+    const trend = document.querySelector<HTMLInputElement>('#trend');
+    const volatility = document.querySelector<HTMLInputElement>('#volatility');
+    const line = document.querySelector<SVGPathElement>('#path-line');
+    const fill = document.querySelector<SVGPathElement>('#path-fill');
+    const trendValue = document.querySelector<HTMLOutputElement>('#trend-value');
+    const volatilityValue = document.querySelector<HTMLOutputElement>('#volatility-value');
+    const summaryTrend = document.querySelector<HTMLElement>('#summary-trend');
+    const summaryVolatility = document.querySelector<HTMLElement>('#summary-volatility');
+
+    // A fixed deterministic sequence keeps parameter comparisons meaningful.
+    let seed = 2024;
+    const perturbations = Array.from({ length: 59 }, () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return (seed / 4294967296 - 0.5) * 2;
+    });
+
+    function draw() {
+      if (!trend || !volatility || !line || !fill || !trendValue || !volatilityValue || !summaryTrend || !summaryVolatility) return;
+      const drift = Number(trend.value);
+      const noise = Number(volatility.value);
+      let current = 0;
+      const values = [current];
+      for (const perturbation of perturbations) {
+        current += drift * 1.5 + perturbation * noise * 9;
+        values.push(current);
+      }
+      const low = Math.min(...values) - 8;
+      const high = Math.max(...values) + 8;
+      const points = values.map((value, index) => [index * (760 / 59), 282 - ((value - low) / (high - low)) * 244]);
+      const path = points.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+      line.setAttribute('d', path);
+      fill.setAttribute('d', `${path} L760 320 L0 320 Z`);
+      trendValue.value = drift.toFixed(1);
+      volatilityValue.value = noise.toFixed(1);
+      summaryTrend.textContent = `${drift > 0 ? '+' : ''}${drift.toFixed(1)}`;
+      summaryVolatility.textContent = noise.toFixed(1);
+    }
+
+    trend?.addEventListener('input', draw);
+    volatility?.addEventListener('input', draw);
+    draw();
+  </script>
+</BaseLayout>
